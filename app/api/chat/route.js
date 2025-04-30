@@ -8,7 +8,7 @@ export async function POST(request) {
     console.log('API isteği başladı');
     const body = await request.json();
     console.log('İstek gövdesi:', body);
-    
+
     const userMessage = body.message;
     let chat_id = body.chat_id;
 
@@ -22,7 +22,7 @@ export async function POST(request) {
 
     // Geçici olarak user_id=1 kullanıyoruz. Gerçek uygulamada bu değer oturum bilgisinden gelmeli
     const user_id = 1;
-    
+
     try {
       // Eğer chat_id yoksa yeni bir sohbet oluştur
       if (!chat_id) {
@@ -38,7 +38,40 @@ export async function POST(request) {
       console.log('Kullanıcı mesajı kaydedildi');
 
       // Bot yanıtını oluştur (bu kısmı kendi bot entegrasyonunuza göre değiştirebilirsiniz)
-      const botResponse = "Merhaba! Mesajınız alındı: " + userMessage;
+      let botResponse = "Merhaba! Mesajınız alındı: " + userMessage;
+
+      // Eğer ANYTHING_LLM_API_KEY mevcutsa, Chatbot API'sine istek gönder
+      const apiKey = process.env.ANYTHING_LLM_API_KEY;
+      if (apiKey) {
+        console.log('AnythingLLM API\'sine istek gönderiliyor...');
+        const anythingLlmApiUrl = 'https://bkc79p6e.rpcld.cc/api/v1/workspace/Firat-University-Chatbot/chat';
+        const sessionId = "some-unique-session-id";
+
+        try {
+          const response = await fetch(anythingLlmApiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+              message: userMessage,
+              mode: "chat",
+              sessionId: sessionId
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+          botResponse = data.textResponse; // Chatbot'un yanıtı
+        } catch (error) {
+          console.error('AnythingLLM API isteği sırasında hata:', error);
+          botResponse = "Bot yanıtını alamadık.";
+        }
+      }
 
       console.log('Bot yanıtı kaydediliyor...');
       // Bot yanıtını veritabanına kaydet
@@ -55,14 +88,8 @@ export async function POST(request) {
         chat_id: chat_id,
         messages: messages
       }, { status: 200 });
-
     } catch (dbError) {
       console.error('Veritabanı işlemi sırasında hata:', dbError);
-      console.error('Hata detayı:', {
-        message: dbError.message,
-        code: dbError.code,
-        stack: dbError.stack
-      });
       return NextResponse.json(
         { error: 'Veritabanı hatası: ' + dbError.message },
         { status: 500 }
@@ -70,11 +97,6 @@ export async function POST(request) {
     }
   } catch (error) {
     console.error('API isteği işlenirken hata:', error);
-    console.error('Hata detayı:', {
-      message: error.message,
-      code: error.code,
-      stack: error.stack
-    });
     return NextResponse.json(
       { error: 'İstek işlenirken hata: ' + error.message },
       { status: 500 }
