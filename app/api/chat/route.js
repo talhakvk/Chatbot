@@ -37,7 +37,7 @@ export async function POST(request) {
       await saveMessage(chat_id, 'user', userMessage);
       console.log('Kullanıcı mesajı kaydedildi');
 
-      // Bot yanıtını oluştur (bu kısmı kendi bot entegrasyonunuza göre değiştirebilirsiniz)
+      // Bot yanıtını oluştur
       let botResponse = "Merhaba! Mesajınız alındı: " + userMessage;
 
       // Eğer ANYTHING_LLM_API_KEY mevcutsa, Chatbot API'sine istek gönder
@@ -45,31 +45,50 @@ export async function POST(request) {
       if (apiKey) {
         console.log('AnythingLLM API\'sine istek gönderiliyor...');
         const anythingLlmApiUrl = 'https://bkc79p6e.rpcld.cc/api/v1/workspace/Firat-University-Chatbot/chat';
-        const sessionId = "some-unique-session-id";
-
+        
         try {
+          console.log('API İstek Detayları:');
+          console.log('URL:', anythingLlmApiUrl);
+          console.log('API Key:', apiKey ? 'Mevcut' : 'Eksik');
+          console.log('İstek Gövdesi:', {
+            message: userMessage,
+            mode: "query",
+            contextBehavior: "include",
+            sessionId: chat_id.toString()
+          });
+
           const response = await fetch(anythingLlmApiUrl, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${apiKey}`
+              'Authorization': `Bearer ${apiKey}`,
+              'Accept': 'application/json'
             },
             body: JSON.stringify({
               message: userMessage,
-              mode: "chat",
-              sessionId: sessionId
+              mode: "query",
+              contextBehavior: "include",
+              sessionId: chat_id.toString()
             })
           });
 
           if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            const errorData = await response.text();
+            console.error('API Yanıt:', errorData);
+            throw new Error(`HTTP error! status: ${response.status}, details: ${errorData}`);
           }
 
           const data = await response.json();
-          botResponse = data.textResponse; // Chatbot'un yanıtı
+          console.log('API Yanıtı:', data);
+          
+          if (data.textResponse) {
+            botResponse = data.textResponse;
+          } else {
+            throw new Error('API yanıtında textResponse bulunamadı');
+          }
         } catch (error) {
           console.error('AnythingLLM API isteği sırasında hata:', error);
-          botResponse = "Bot yanıtını alamadık.";
+          botResponse = "Üzgünüm, şu anda size yardımcı olamıyorum. Lütfen daha sonra tekrar deneyin.";
         }
       }
 
