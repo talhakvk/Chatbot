@@ -42,39 +42,54 @@ export async function POST(request) {
 
       // Eğer ANYTHING_LLM_API_KEY mevcutsa, Chatbot API'sine istek gönder
       const apiKey = process.env.ANYTHING_LLM_API_KEY;
+      console.log('API Key Kontrolü:', {
+        apiKeyVarMi: !!apiKey,
+        apiKeyUzunluk: apiKey ? apiKey.length : 0,
+        tumCevreselDegiskenler: process.env
+      });
+
       if (apiKey) {
         console.log('AnythingLLM API\'sine istek gönderiliyor...');
-        const anythingLlmApiUrl = 'https://bkc79p6e.rpcld.cc/api/v1/workspace/Firat-University-Chatbot/chat';
+        const anythingLlmApiUrl = 'https://opljffc7.rpcld.cc/api/v1/workspace/chatbot/chat';
         
         try {
           console.log('API İstek Detayları:');
           console.log('URL:', anythingLlmApiUrl);
           console.log('API Key:', apiKey ? 'Mevcut' : 'Eksik');
-          console.log('İstek Gövdesi:', {
+          console.log('API Key Değeri:', apiKey);
+          const requestBody = {
             message: userMessage,
             mode: "query",
             contextBehavior: "include",
             sessionId: chat_id.toString()
-          });
+          };
+          console.log('İstek Gövdesi:', JSON.stringify(requestBody, null, 2));
+
+          const headers = {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+            'Accept': 'application/json'
+          };
+          console.log('İstek Başlıkları:', JSON.stringify(headers, null, 2));
 
           const response = await fetch(anythingLlmApiUrl, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${apiKey}`,
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-              message: userMessage,
-              mode: "query",
-              contextBehavior: "include",
-              sessionId: chat_id.toString()
-            })
+            headers: headers,
+            body: JSON.stringify(requestBody)
           });
+
+          console.log('API Yanıt Durumu:', response.status);
+          console.log('API Yanıt Başlıkları:', JSON.stringify(Object.fromEntries([...response.headers]), null, 2));
 
           if (!response.ok) {
             const errorData = await response.text();
-            console.error('API Yanıt:', errorData);
+            console.error('API Hata Yanıtı:', errorData);
+            try {
+              const parsedError = JSON.parse(errorData);
+              console.error('Ayrıştırılmış API Hatası:', JSON.stringify(parsedError, null, 2));
+            } catch (e) {
+              console.error('Ham API Hata Yanıtı:', errorData);
+            }
             throw new Error(`HTTP error! status: ${response.status}, details: ${errorData}`);
           }
 
