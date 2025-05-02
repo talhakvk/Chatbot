@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '../lib/supabase';
 import Image from 'next/image';
 import styles from './page.module.css';
 import ChatBot from './components/ChatBot';
