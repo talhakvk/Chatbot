@@ -166,3 +166,92 @@ a.secondary {
     filter: invert();
   }
 }
+
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-image: url('/kampüs2-scaled.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+}
+
+.login-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+.login-box {
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 400px;
+  position: relative;
+  z-index: 2;
+}
+
+.logo {
+  margin-bottom: 1rem;
+}
+
+.btn-maroon {
+  background-color: #8B0000;
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.btn-maroon:hover {
+  background-color: #6B0000;
+  color: white;
+}
+
+.btn-maroon:disabled {
+  background-color: #A8A8A8;
+  cursor: not-allowed;
+}
+
+.form-control {
+  border: 1px solid #ced4da;
+  padding: 0.75rem;
+  border-radius: 5px;
+}
+
+.form-control:focus {
+  border-color: #8B0000;
+  box-shadow: 0 0 0 0.2rem rgba(139, 0, 0, 0.25);
+}
+
+.alert {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  border-radius: 5px;
+}
+
+.headerTitle {
+  color: #8B0000;
+  font-weight: 600;
+}
+
+.headerSubtitle {
+  color: #333;
+  font-weight: 500;
+}
+
+.formLabel {
+  color: #333;
+  font-weight: 500;
+}
