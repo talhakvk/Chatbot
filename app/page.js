@@ -104,6 +104,9 @@ export default function Home() {
             )}
           </button>
         </form>
+        <a href="/register" className={styles.registerLink}>
+          Kayıt Ol
+        </a>
       </div>
     </div>
   );

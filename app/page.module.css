@@ -255,3 +255,16 @@ a.secondary {
   color: #333;
   font-weight: 500;
 }
+
+.registerLink {
+  display: block;
+  text-align: center;
+  margin-top: 1rem;
+  color: #666;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.registerLink:hover {
+  color: #8B0000;
+}
