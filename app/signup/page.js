@@ -2,51 +2,60 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '../lib/supabase';
+import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
-import Link from 'next/link';
 import styles from './page.module.css';
-import ChatBot from './components/ChatBot';
 
-export default function Home() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+export default function SignUp() {
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    password: ''
+  });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
 
-  const handleLogin = async (e) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
+    setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            username: formData.username
+          }
+        }
       });
 
       if (error) throw error;
 
       if (data?.user) {
-        setIsLoggedIn(true);
+        router.push('/login');
       }
     } catch (error) {
-      setError('Giriş başarısız. Lütfen bilgilerinizi kontrol edin.');
-      console.error('Giriş hatası:', error);
+      setError('Kayıt işlemi başarısız: ' + error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  if (isLoggedIn) {
-    return <ChatBot />;
-  }
-
   return (
-    <div className={styles['login-container']}>
-      <div className={styles['login-box']}>
+    <div className={styles.container}>
+      <div className={styles.overlay}></div>
+      <div className={styles.signupBox}>
         <div className="text-center mb-4">
           <Image
             src="/firat-logo.png"
@@ -56,7 +65,7 @@ export default function Home() {
             className={styles.logo}
           />
           <h2 className={`mt-3 ${styles.headerTitle}`}>Fırat Üniversitesi</h2>
-          <h4 className={styles.headerSubtitle}>Chatbot Girişi</h4>
+          <h4 className={styles.headerSubtitle}>Yeni Hesap Oluştur</h4>
         </div>
 
         {error && (
@@ -65,15 +74,29 @@ export default function Home() {
           </div>
         )}
 
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-3">
+            <label htmlFor="username" className={styles.formLabel}>Kullanıcı Adı</label>
+            <input
+              type="text"
+              className="form-control"
+              id="username"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
           <div className="mb-3">
             <label htmlFor="email" className={styles.formLabel}>E-posta</label>
             <input
               type="email"
               className="form-control"
               id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
               required
             />
           </div>
@@ -84,8 +107,9 @@ export default function Home() {
               type="password"
               className="form-control"
               id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
               required
             />
           </div>
@@ -98,17 +122,14 @@ export default function Home() {
             {loading ? (
               <>
                 <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                Giriş Yapılıyor...
+                Kayıt Yapılıyor...
               </>
             ) : (
-              'Giriş Yap'
+              'Kayıt Ol'
             )}
           </button>
         </form>
-        <Link href="/signup" className={styles.registerLink}>
-          Kayıt Ol
-        </Link>
       </div>
     </div>
   );
-}
+} 
