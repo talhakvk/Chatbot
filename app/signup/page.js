@@ -30,7 +30,8 @@ export default function SignUp() {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signUp({
+      // 1. Önce Supabase Auth ile kullanıcıyı kaydet
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
@@ -40,14 +41,33 @@ export default function SignUp() {
         }
       });
 
-      if (error) throw error;
+      if (authError) throw authError;
 
-      if (data?.user) {
-        router.push('/login');
+      if (authData?.user) {
+        // 2. Users tablosuna kullanıcı bilgilerini ekle
+        const { error: insertError } = await supabase
+          .from('users')
+          .insert([
+            {
+              username: formData.username,
+              email: formData.email,
+              role: 'user', // Sabit olarak 'user' rolü atanıyor
+              created_at: new Date().toISOString(),
+              auth_id: authData.user.id
+            }
+          ]);
+
+        if (insertError) throw insertError;
+
+        // 3. Başarılı kayıt sonrası login sayfasına yönlendir
+        router.push('/');
       }
     } catch (error) {
-      setError('Kayıt işlemi başarısız: ' + error.message);
-    } finally {
+        // Hata nesnesini stringe çevirerek konsola yazdır
+        console.error('Kayıt hatası:', JSON.stringify(error));
+        // Hata mesajı varsa onu göster, yoksa tüm hatayı string olarak göster
+        setError('Kayıt işlemi başarısız: ' + (error?.message || JSON.stringify(error)));
+      } finally {
       setLoading(false);
     }
   };
