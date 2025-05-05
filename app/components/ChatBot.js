@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
 
-const ChatBot = () => {
+const ChatBot = ({ userId }) => {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -20,35 +20,27 @@ const ChatBot = () => {
     scrollToBottom();
   }, [messages]);
 
-  // Veritabanından mesajları çek
+  // Kullanıcıya göre mesajları çek
   useEffect(() => {
     async function fetchMessages() {
+      if (!userId) return;
       try {
-        const { data, error } = await supabase
-          .from('messages')
-          .select('id, sender, content, timestamp, chat_id')
-          .order('timestamp', { ascending: true });
-
-        if (error) {
-          throw error;
-        }
-
-        if (data && data.length > 0) {
-          // En son sohbetin ID'sini al
-          const lastChatId = data[data.length - 1].chat_id;
-          setChatId(lastChatId);
-
-          // Mesajları formatla
-          const formattedMessages = data.map(msg => ({
+        const response = await fetch(`/api/chat?user_id=${userId}`);
+        if (!response.ok) throw new Error('Sohbet geçmişi alınamadı');
+        const data = await response.json();
+        if (data.history && data.history.length > 0) {
+          // Son sohbetin ID'sini al
+          const lastChat = data.history[0];
+          setChatId(lastChat.chat.id);
+          // Son sohbetin mesajlarını göster
+          const formattedMessages = lastChat.messages.map(msg => ({
             id: msg.id,
             type: msg.sender,
             content: msg.content,
             timestamp: new Date(msg.timestamp)
           }));
-
           setMessages(formattedMessages);
         } else {
-          // Mesaj yoksa hoşgeldin mesajını göster
           setMessages([
             {
               id: 1,
@@ -62,9 +54,8 @@ const ChatBot = () => {
         console.error('Mesajları çekme hatası:', error);
       }
     }
-
     fetchMessages();
-  }, []);
+  }, [userId]);
 
   // Mesaj gönderme işlemi
   const handleSendMessage = async () => {
@@ -92,7 +83,8 @@ const ChatBot = () => {
         },
         body: JSON.stringify({ 
           message: inputMessage,
-          chat_id: chatId
+          chat_id: chatId,
+          user_id: userId
         }),
       });
 

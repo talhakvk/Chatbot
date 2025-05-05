@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../lib/supabase';
 import Image from 'next/image';
@@ -14,6 +14,7 @@ export default function Home() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userId, setUserId] = useState(null);
   const router = useRouter();
 
   const handleLogin = async (e) => {
@@ -40,8 +41,24 @@ export default function Home() {
     }
   };
 
+  useEffect(() => {
+    if (isLoggedIn) {
+      supabase.auth.getUser().then(async ({ data }) => {
+        const authId = data?.user?.id;
+        if (authId) {
+          const { data: userRow, error } = await supabase
+            .from('users')
+            .select('id')
+            .eq('auth_id', authId)
+            .single();
+          setUserId(userRow?.id || null);
+        }
+      });
+    }
+  }, [isLoggedIn]);
+
   if (isLoggedIn) {
-    return <ChatBot />;
+    return <ChatBot userId={userId} />;
   }
 
   return (

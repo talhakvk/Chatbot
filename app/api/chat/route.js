@@ -1,6 +1,6 @@
 // app/api/chat/route.js
 
-import { saveMessage, getMessagesByChatId, createChat } from '@/lib/db-queries';
+import { saveMessage, getMessagesByChatId, createChat, getChatHistoryByUserId } from '@/lib/db-queries';
 import { NextResponse } from 'next/server';
 
 export async function POST(request) {
@@ -11,6 +11,7 @@ export async function POST(request) {
 
     const userMessage = body.message;
     let chat_id = body.chat_id;
+    const user_id = body.user_id;
 
     if (!userMessage) {
       console.log('Mesaj boş');
@@ -20,8 +21,12 @@ export async function POST(request) {
       );
     }
 
-    // Geçici olarak user_id=1 kullanıyoruz. Gerçek uygulamada bu değer oturum bilgisinden gelmeli
-    const user_id = 1;
+    if (!user_id) {
+      return NextResponse.json(
+        { error: 'user_id gerekli' },
+        { status: 400 }
+      );
+    }
 
     try {
       // Eğer chat_id yoksa yeni bir sohbet oluştur
@@ -135,5 +140,19 @@ export async function POST(request) {
       { error: 'İstek işlenirken hata: ' + error.message },
       { status: 500 }
     );
+  }
+}
+
+export async function GET(request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get('user_id');
+    if (!userId) {
+      return NextResponse.json({ error: 'user_id parametresi gerekli' }, { status: 400 });
+    }
+    const history = await getChatHistoryByUserId(userId);
+    return NextResponse.json({ history }, { status: 200 });
+  } catch (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
