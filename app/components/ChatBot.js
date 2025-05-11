@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 const ChatBot = ({ userId }) => {
   const [messages, setMessages] = useState([]);
@@ -10,6 +11,7 @@ const ChatBot = ({ userId }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [chatId, setChatId] = useState(null);
   const messagesEndRef = useRef(null);
+  const router = useRouter();
 
   // Otomatik kaydırma için useEffect
   const scrollToBottom = () => {
@@ -125,6 +127,17 @@ const ChatBot = ({ userId }) => {
     }
   };
 
+  // Çıkış fonksiyonu
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (!error) {
+      window.location.href = '/'; // Tam sayfa yenilemeli yönlendirme
+    } else {
+      alert('Çıkış sırasında bir hata oluştu!');
+      console.error(error);
+    }
+  };
+
   return (
     <>
       <div className="overlay"></div>
@@ -141,6 +154,10 @@ const ChatBot = ({ userId }) => {
           <p className="header-subtitle">
             Üniversite bilgi ve hizmetlerine erişim için akıllı asistanınız.
           </p>
+          <button onClick={handleLogout} className="logout-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h4a2 2 0 012 2v1" /></svg>
+            Çıkış Yap
+          </button>
         </div>
         <div className="chat-container">
           {/* Header */}
