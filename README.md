@@ -2,7 +2,7 @@
 
 An AI-powered chatbot system providing instant access to academic and administrative information for university students and staff.
 
-![Firat Chatbot Banner](https://dummyimage.com/1200x400/2e2e2e/ffffff&text=Firat+University+AI+Chatbot+Assistant)
+![Firat Chatbot Banner](https://github.com/talhakvk/Chatbot/blob/main/public/Ekran%20g%C3%B6r%C3%BCnt%C3%BCs%C3%BC%202025-07-02%20222527.png?raw=true)
 
 ## 🚀 About the Project
 
@@ -47,9 +47,11 @@ You can try the live version of the project here:
 ## 🖼️ UI Screenshots (optional)
 Consider adding actual UI screenshots here:
 
-/screenshots/login.png
+![/screenshots/login.png](https://github.com/talhakvk/Chatbot/blob/main/public/Ekran%20g%C3%B6r%C3%BCnt%C3%BCs%C3%BC%202025-07-02%20222613.png?raw=true)
 
-/screenshots/chat-interface.png
+![/screenshots/chat-interface.png](https://github.com/talhakvk/Chatbot/blob/main/public/Ekran%20g%C3%B6r%C3%BCnt%C3%BCs%C3%BC%202025-07-02%20222632.png?raw=true)
+
+![/screenshots/chat-interface.png](https://github.com/talhakvk/Chatbot/blob/main/public/Ekran%20g%C3%B6r%C3%BCnt%C3%BCs%C3%BC%202025-07-02%20222645.png?raw=true)
 
 ## 📂 System Architecture
 
